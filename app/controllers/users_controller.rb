@@ -5,16 +5,22 @@ class UsersController < ApplicationController
   before_action :admin_user,     only: :destroy
 
   def index
-  @users = User.paginate(page: params[:page])  
+    @users = User.paginate(page: params[:page])  
   end
 
   def show
-    @user = User.find(params[:id])    
+    @user = User.find(params[:id])
+    @microposts = @user.microposts.paginate(page: params[:page])
   end
 
   def new
-    @user = User.new
+    if signed_in?
+      redirect_to(root_url)
+    else
+      @user = User.new
+    end
   end
+
 
   def create
     @user = User.new(user_params)
@@ -52,13 +58,6 @@ class UsersController < ApplicationController
     end
 
     # Before filters
-
-    def signed_in_user
-      unless signed_in?
-        store_location
-        redirect_to signin_url, notice: "Please sign in."
-      end
-    end
 
     def correct_user
       @user = User.find(params[:id])
